@@ -4,15 +4,10 @@ import java.util.List;
 
 public class Main {
 
-    public static final int execRound = 1000;  // 执行次数
-    public static final int redPacketListSize = 3;  // 红包池大小
-    public static final int needToRemoveSize = 1;  // 首次选中后，剩下的那些里，要去掉的空红包的数量
-    public static final boolean needExchange = true;  // 是否交换
-
     public static void main(String[] args) {
         int getMoneyTimes = 0;
         int noGetMoneyTimes = 0;
-        for (int i = 0; i < execRound; i++) {
+        for (int i = 0; i < Config.execRound; i++) {
             boolean getMoney = exec();
             if (getMoney) {
                 getMoneyTimes++;
@@ -21,8 +16,8 @@ public class Main {
             }
         }
 
-        System.out.println("是否交换：" + needExchange);
-        System.out.println("总次数：" + execRound);
+        System.out.println("是否交换：" + Config.needExchange);
+        System.out.println("总次数：" + Config.execRound);
         System.out.println("拿到钱次数：" + getMoneyTimes);
         System.out.println("没拿到钱次数：" + noGetMoneyTimes);
     }
@@ -38,7 +33,7 @@ public class Main {
         removeBlankInOthers(redPacketList);
 
         // 拿到（去空之后）剩余之中的一个
-        RedPacket redPacketRemain = getRemainOne(redPacketList);
+        RedPacket redPacketRemain = getOneInRemain(redPacketList);
         // 交换(or不交换)
         redPacketChosen = exchange(redPacketChosen, redPacketRemain);
 
@@ -51,7 +46,7 @@ public class Main {
     }
 
     private static RedPacket exchange(RedPacket redPacketChosen, RedPacket redPacketRemain) {
-        if (!needExchange) {
+        if (!Config.needExchange) {
             return redPacketChosen;
         }
 
@@ -60,7 +55,7 @@ public class Main {
         return redPacketRemain;
     }
 
-    private static RedPacket getRemainOne(List<RedPacket> redPacketList) {
+    private static RedPacket getOneInRemain(List<RedPacket> redPacketList) {
         // 随机抽一个
         int index = (int) (Math.random() * (redPacketList.size()));
         return redPacketList.get(index);
@@ -70,13 +65,13 @@ public class Main {
         int removeCount = 0;
         Iterator<RedPacket> iterator = redPacketList.iterator();
         while (iterator.hasNext()) {
-            if (removeCount == needToRemoveSize) {
+            if (removeCount == Config.needToRemoveSize) {
                 break;
             }
 
             RedPacket redPacket = iterator.next();
-            // 有钱的不能去掉
-            if (redPacket.isHasMoney()) {
+            // 有钱的不能去掉(可配置有钱的也能去掉)
+            if (redPacket.isHasMoney() && !Config.canRemoveRedPacketHasMoney) {
                 continue;
             }
             iterator.remove();
@@ -86,7 +81,7 @@ public class Main {
 
     private static RedPacket firstChoose(List<RedPacket> redPacketList) {
         // 随机抽一个
-        int index = (int) (Math.random() * (redPacketListSize));
+        int index = (int) (Math.random() * (Config.redPacketListSize));
         RedPacket redPacketChosen = redPacketList.get(index);
         redPacketChosen.setChosen(true);
 
@@ -99,12 +94,12 @@ public class Main {
     private static List<RedPacket> buildRedPacketList() {
         // 初始化红包池
         List<RedPacket> redPacketList = new ArrayList<>();
-        for (int i = 0; i < redPacketListSize; i++) {
+        for (int i = 0; i < Config.redPacketListSize; i++) {
             redPacketList.add(new RedPacket());
         }
 
         // 塞红包
-        int index = (int) (Math.random() * (redPacketListSize));
+        int index = (int) (Math.random() * (Config.redPacketListSize));
         RedPacket redPacketHasMoney = redPacketList.get(index);
         redPacketHasMoney.setHasMoney(true);
 
